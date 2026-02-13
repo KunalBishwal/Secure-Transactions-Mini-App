@@ -1,135 +1,42 @@
-# Turborepo starter
+# 🚀 Mirfa Secure Transactions Mini-App
 
-This Turborepo starter is maintained by the Turborepo core team.
+A full-stack monorepo demonstrating **Envelope Encryption** for secure transaction handling, built as part of the Mirfa Software Engineer Intern Challenge.
 
-## Using this example
+## 🏗️ Architecture
+This project is structured as a **TurboRepo** monorepo to ensure clean separation of concerns:
+* **`apps/web`**: Next.js frontend providing a simple, clean interface for users to encrypt and decrypt transaction payloads.
+* **`apps/api`**: Fastify backend API that handles the secure processing and storage of transaction records.
+* **`packages/crypto`**: A shared internal TypeScript library containing the core encryption and decryption logic.
 
-Run the following command:
+## 🔐 Security Implementation: Envelope Encryption
+To meet the challenge's core security requirements, I implemented **Envelope Encryption** using **AES-256-GCM**.
 
-```sh
-npx create-turbo@latest
-```
 
-## What's inside?
 
-This Turborepo includes the following packages/apps:
+### The Process:
+1.  **DEK Generation**: For every transaction, a unique 32-byte Data Encryption Key (DEK) is generated.
+2.  **Payload Encryption**: The user's JSON payload is encrypted with the DEK.
+3.  **Key Wrapping**: The DEK itself is then encrypted (wrapped) using a **Master Key** stored securely in the backend environment.
+4.  **Integrity Checks**: AES-GCM provides an authentication tag, which I use to verify that neither the ciphertext, the nonces, nor the tags have been tampered with.
 
-### Apps and Packages
+## 🛠️ Tech Stack
+* **Monorepo Management**: TurboRepo
+* **Frontend**: Next.js (App Router), TypeScript
+* **Backend**: Fastify, TypeScript
+* **Package Manager**: pnpm
+* **Deployment**: Vercel
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## 🚀 Getting Started
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Prerequisites
+* Node.js 20+
+* pnpm
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+### Setup
+1.  Clone the repository.
+2.  Create an `.env` file in `apps/api/` based on `.env.example`.
+3.  Set `MASTER_KEY_HEX` to a 64-character hex string (32 bytes).
+4.  Run the following commands:
+```bash
+pnpm install
+pnpm dev
