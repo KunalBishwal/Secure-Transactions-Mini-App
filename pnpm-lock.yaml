@@ -70,8 +70,11 @@ importers:
 
   packages/crypto:
     devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@types/node':
-        specifier: ^20.19.33
+        specifier: ^20.0.0
         version: 20.19.33
       typescript:
         specifier: ^5.0.0
