@@ -1,102 +1,195 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
+"use client";
+
+import { useState } from "react";
 import styles from "./page.module.css";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
-
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
-
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [partyId, setPartyId] = useState("party_123");
+  const [payload, setPayload] = useState(
+    '{\n  "amount": 5000,\n  "currency": "AED"\n}'
+  );
+  const [record, setRecord] = useState<any | null>(null);
+  const [decrypted, setDecrypted] = useState<any | null>(null);
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+  const handleEncrypt = async () => {
+    setLoading(true);
+    setError("");
+    setRecord(null);
+    setDecrypted(null);
+
+    try {
+      let parsedPayload: any;
+
+      try {
+        parsedPayload = JSON.parse(payload);
+      } catch {
+        throw new Error("Invalid JSON format in payload");
+      }
+
+      const res = await fetch(`${API_URL}/tx/encrypt`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ partyId, payload: parsedPayload }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Encryption failed");
+      }
+
+      setRecord(data);
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDecrypt = async () => {
+    if (!record || !record.id) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(
+        `${API_URL}/tx/${record.id}/decrypt`,
+        { method: "POST" }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Decryption failed");
+      }
+
+      setDecrypted(data?.decryptedPayload || null);
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className={styles.container}>
+      <div className={styles.wrapper}>
+
+      
+        <header className={styles.header}>
+          <h1 className={styles.title}>🚀 Mirfa Secure Tx</h1>
+          <p className={styles.subtitle}>
+            End-to-end envelope encryption demo
+          </p>
+        </header>
+
+  
+        <section className={styles.formCard}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Party ID</label>
+            <input
+              className={styles.input}
+              value={partyId}
+              onChange={(e) => setPartyId(e.target.value)}
+              placeholder="e.g. party_123"
             />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.dev/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>JSON Payload</label>
+            <textarea
+              className={`${styles.input} ${styles.textarea}`}
+              value={payload}
+              onChange={(e) => setPayload(e.target.value)}
+              rows={6}
+            />
+          </div>
+
+          <button
+            className={styles.button}
+            onClick={handleEncrypt}
+            disabled={loading}
           >
-            Read our docs
-          </a>
-        </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.dev?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.dev →
-        </a>
-      </footer>
-    </div>
+            {loading ? "Processing..." : "🔒 Encrypt & Store"}
+          </button>
+
+          {error && (
+            <div className={styles.error}>
+              ⚠️ {error}
+            </div>
+          )}
+        </section>
+
+        {/* ===== RESULTS ===== */}
+        {record !== null && (
+          <section className={styles.resultCard}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Transaction ID</label>
+              <input
+                className={styles.input}
+                value={record.id}
+                readOnly
+              />
+            </div>
+
+            <div className={styles.grid}>
+
+              {/* Encrypted */}
+              <div className={styles.card}>
+                <h3 className={styles.cardTitle}>
+                  🔐 Encrypted Store
+                </h3>
+
+                <div className={styles.codeBlock}>
+                  {JSON.stringify(
+                    {
+                      payload_ct:
+                        record?.payload_ct?.substring(0, 16) + "...",
+                      dek_wrapped:
+                        record?.dek_wrapped?.substring(0, 16) + "...",
+                      alg: record?.alg,
+                    },
+                    null,
+                    2
+                  )}
+                </div>
+
+                <button
+                  className={styles.decryptButton}
+                  onClick={handleDecrypt}
+                >
+                  🔓 Decrypt Data
+                </button>
+              </div>
+
+              {/* Decrypted */}
+              <div className={styles.card}>
+                <h3 className={styles.cardTitle}>
+                  ✅ Decrypted View
+                </h3>
+
+                {decrypted !== null ? (
+                  <pre className={styles.codeBlock}>
+                    {JSON.stringify(decrypted, null, 2)}
+                  </pre>
+                ) : (
+                  <div className={styles.placeholder}>
+                    Waiting for decryption...
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </section>
+        )}
+
+      </div>
+    </main>
   );
 }
